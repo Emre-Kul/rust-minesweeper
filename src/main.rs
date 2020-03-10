@@ -10,10 +10,15 @@ mod core;
 
 fn main() {
     let mut game: Game = Game::create();
-    while game.is_finished == false {
+    while game.is_finished() {
+        print!("{}[2J", 27 as char);
         run(&mut game);
     }
-
+    if game.is_bomb_found == true {
+        println!("You Lost...!");
+    } else {
+        println!("You Win...!");
+    }
 }
 
 fn read_coords() -> (usize, usize) {
@@ -30,7 +35,7 @@ fn read_coords() -> (usize, usize) {
 fn draw_screen(game: &Game) {
     print!("    ");
     for x in 0..game.terrain.blocks.len() {
-        print!(" {} ", num_to_string_with_zeros((x + 1) as u32));
+        print!("  {}  ", num_to_string_with_zeros((x + 1) as u32));
     }
     println!(" ");
     for (x, vec) in game.terrain.blocks.iter().enumerate() {
@@ -39,10 +44,10 @@ fn draw_screen(game: &Game) {
         for (y, block) in vec.iter().enumerate() {
             print!("  ");
             match block {
-                BlockType::CLOSED => print!("*"),
-                BlockType::BOMB => print!("*"),
-                BlockType::OPEN(n) => print!("{}", n),
-                (_) => print!("?")
+                BlockType::CLOSED => print!("|+|"),
+                BlockType::BOMB => print!("|+|"),
+                BlockType::OPEN(n) => print!("|{}|", n),
+                (_) => print!("|?|")
             }
             print!(" ");
         }
@@ -55,7 +60,6 @@ fn run(game: &mut Game) {
     println!(" --- Please Input Coords --- ");
     let coords: (usize, usize) = read_coords();
     game.open_block(coords);
-    println!("Coords : {}, {}", coords.0, coords.1);
 }
 
 fn num_to_string_with_zeros(num: u32) -> String {

@@ -5,9 +5,10 @@ use rand::Rng;
 
 use crate::core::terrain::{Terrain, BlockType};
 use crate::core::level::Level;
+use std::borrow::Borrow;
 
 pub struct Game {
-    pub is_finished: bool,
+    pub is_bomb_found: bool,
     pub terrain: Terrain,
 }
 
@@ -15,14 +16,14 @@ impl Game {
 
     pub fn create() -> Game {
         Game {
-            is_finished: false,
+            is_bomb_found: false,
             terrain: Terrain::create(Level::EASY),
         }
     }
 
     pub fn open_block(&mut self, coords: (usize, usize)) {
         if self.terrain.blocks[coords.0][coords.1] == BlockType::BOMB {
-            self.is_finished = true;
+            self.is_bomb_found = true;
         } else {
             let count = self.count_neigh_bomb((coords.0 as isize, coords.1 as isize));
             let neighs = self.get_closed_neighs((coords.0 as isize, coords.1 as isize));
@@ -34,6 +35,21 @@ impl Game {
             }
 
         }
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.is_bomb_found == false && self.has_closed_block()
+    }
+
+    fn has_closed_block(&self) -> bool {
+        for i in self.terrain.blocks.iter() {
+            for block in i.iter() {
+                if block.eq(&BlockType::CLOSED) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     fn count_neigh_bomb(&self, coords: (isize, isize)) -> u32 {
